@@ -1,10 +1,16 @@
 """Twitch username checker using environment-based config."""
 
+import json
 import os
 
 import requests
-from config import load_config  # Still using config.json for selectors
 from playwright.sync_api import sync_playwright
+
+
+def load_config():
+    """Load config json."""
+    with open("config.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def send_discord_notification(webhook_url, message):
@@ -52,6 +58,7 @@ def check_username_availability(username, site_conf, screenshot_conf):
 
         page.fill(site_conf["username_field"], username)
         page.click(site_conf["submit_button"])
+        page.wait_for_timeout(1500)  # Wait 1.5 seconds to let the result load
 
         try:
             page.wait_for_selector(site_conf["result_selector"], timeout=10000)
@@ -70,7 +77,15 @@ def check_username_availability(username, site_conf, screenshot_conf):
             result_text = None
             is_available = False
 
-        if screenshot_conf.get("enabled", False):
+        # Check env override, fallback to config.json
+        screenshot_enabled = (
+            os.getenv(
+                "SCREENSHOTS_ENABLED", str(screenshot_conf.get("enabled", False))
+            ).lower()
+            == "true"
+        )
+
+        if screenshot_enabled:
             screenshot_path = screenshot_conf["path_format"].format(username=username)
             page.screenshot(path=screenshot_path, full_page=True)
             print(f"[*] Screenshot saved: {screenshot_path}")

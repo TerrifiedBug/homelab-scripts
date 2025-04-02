@@ -4,7 +4,6 @@ import json
 import os
 
 import requests
-
 from playwright.sync_api import sync_playwright
 
 CONFIG_PATH = "config.json"
@@ -64,6 +63,7 @@ def check_username_availability(username, site_conf, screenshot_conf):
 
         page.fill(site_conf["username_field"], username)
         page.click(site_conf["submit_button"])
+        page.wait_for_timeout(1500)  # Wait 1.5 seconds to let the result load
 
         try:
             page.wait_for_selector(site_conf["result_selector"], timeout=10000)
@@ -75,6 +75,10 @@ def check_username_availability(username, site_conf, screenshot_conf):
 
             result_text = result_elem.inner_text().strip()
             result_classes = result_elem.get_attribute("class") or ""
+
+            print(f"[DEBUG] Result text: {result_text}")
+            print(f"[DEBUG] Result classes: {result_classes}")
+
             is_available = "alert-success" in result_classes
 
         except Exception as error:

@@ -6,7 +6,7 @@
         "result_selector": "#result"
     },
     "screenshots": {
-        "enabled": false,
-        "path_format": "debug_{username}.png"
+        "enabled": true,
+        "path_format": "screenshots/debug_{username}.png"
     }
 }
