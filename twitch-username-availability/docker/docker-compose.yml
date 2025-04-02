@@ -1,12 +1,12 @@
-version: "3.8"
+version: "3.9"
 
 services:
   twitch-checker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: twitch-checker
-    env_file: .env
+    image: twitch-username-availability:latest
+    container_name: twitch-username-availability
+    restart: unless-stopped
+    env_file:
+      - stack.env
     volumes:
       - ./cron-logs:/var/log
-    restart: unless-stopped
+      - ./screenshots:/app/screenshots
