@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  twitch-checker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: twitch-checker
+    env_file:
+      - .env
+    volumes:
+      - ./cron-logs:/var/log   # Optional: Persist logs outside container
+    restart: unless-stopped

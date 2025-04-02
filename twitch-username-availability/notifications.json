@@ -1,0 +1,11 @@
+{
+    "discord": {
+        "enabled": true,
+        "webhook_url": "https://discord.com/api/webhooks/your_webhook_here"
+    },
+    "callmebot": {
+        "enabled": true,
+        "phone_number": "+44",
+        "api_key": "apikey"
+    }
+}
