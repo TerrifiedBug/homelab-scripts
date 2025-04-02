@@ -2,31 +2,29 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install OS packages: cron + curl for playwright + cron logging
-RUN apt-get update && \
-    apt-get install -y curl cron && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install curl + cron
+RUN apt-get update && apt-get install -y curl cron && apt-get clean
 
-# Install pip + playwright
+# Copy requirements and install packages
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     playwright install-deps && \
     playwright install
 
-# Copy the app code
+# Copy app code
 COPY . .
 
-# Copy in cron setup script
-COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Make entrypoint script executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-# Set ENV for documentation (actual values come from .env)
-ENV CRON_SCHEDULE="0 * * * *"
+# Declare env vars (documented defaults)
 ENV USERNAMES=""
-ENV DISCORD_ENABLED="false"
+ENV DISCORD_ENABLED=false
 ENV DISCORD_WEBHOOK=""
-ENV CALLMEBOT_ENABLED="false"
+ENV CALLMEBOT_ENABLED=false
 ENV CALLMEBOT_PHONE=""
 ENV CALLMEBOT_APIKEY=""
+ENV CRON_SCHEDULE="0 * * * *"
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

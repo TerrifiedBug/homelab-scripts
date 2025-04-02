@@ -6,8 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: twitch-checker
-    env_file:
-      - .env
+    env_file: .env
     volumes:
-      - ./cron-logs:/var/log   # Optional: Persist logs outside container
+      - ./cron-logs:/var/log
     restart: unless-stopped
