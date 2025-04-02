@@ -7,7 +7,7 @@ from getpass import getpass
 
 import requests
 
-PORTAINER_URL = "https://portainer.terrifiedbug.com"
+PORTAINER_URL = "redacted"
 OUTPUT_DIR = "homelab-stacks"
 
 
