@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
 
 # Set up logging
 logging.basicConfig(
@@ -104,8 +105,14 @@ def update_compose_file(compose_file_path, redacted_vars, _stack_path):
             logger.info("No changes needed for %s", compose_file_path)
             return False
 
-    except Exception as e:
-        logger.error("Error updating %s: %s", compose_file_path, e)
+    except (IOError, OSError) as e:
+        logger.error("Error opening or writing to file %s: %s", compose_file_path, e)
+        return False
+    except YAMLError as e:
+        logger.error("YAML parsing error in %s: %s", compose_file_path, e)
+        return False
+    except (TypeError, KeyError, ValueError) as e:
+        logger.error("Error processing YAML data in %s: %s", compose_file_path, e)
         return False
 
 
