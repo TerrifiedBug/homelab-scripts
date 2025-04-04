@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-# Requires: pip install ruamel.yaml
+"""Script to convert all docker-compose.yml to use variables for user defined environments"""
+
 import logging
 import re
 from pathlib import Path
