@@ -1,10 +1,19 @@
+"""Script to update callback URLs for OIDC client en masse"""
+
 import requests
 
-# Your domain
-domain = "domain.com"
+DOMAIN = "domain.com"
+CLIENT_NAME = "Pocket ID"
+API_KEY = ""
+BASE_URL = "https://pocketid.domain.com"
+HEADERS = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "X-API-KEY": API_KEY,
+}
 
-# List of all your services from the Caddyfile
-services = [
+# List of services you want added to oidc
+SERVICES = [
     "portainer",
     "grafana",
     "nginx",
@@ -61,69 +70,64 @@ services = [
     "sabnzbd",
 ]
 
-# Generate callback URLs for each service
-callback_urls = [
-    f"https://{service}.{domain}/caddy-security/oauth2/generic/authorization-code-callback"
-    for service in services
+CALLBACK_URLS = [
+    f"https://{service}.{DOMAIN}/caddy-security/oauth2/generic/authorization-code-callback"
+    for service in SERVICES
 ]
 
-# Your API key
-api_key = ""
 
-# API endpoint details
-base_url = "https://pocketid.domain.com"  # Replace with your actual Pocket-ID host
-headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    "X-API-KEY": api_key,
-}
+def main():
+    """Main function to get and update client information."""
+    # Step 1: Get a list of all clients to find the one named in CLIENT_NAME
+    response = requests.get(f"{BASE_URL}/api/oidc/clients", headers=HEADERS, timeout=60)
+    print(f"Status: {response.status_code}")
 
-# Step 1: Get a list of all clients to find the one named "Pocket ID"
-response = requests.get(f"{base_url}/api/oidc/clients", headers=headers)
-print(f"Status: {response.status_code}")
+    try:
+        response_data = response.json()
 
-try:
-    response_data = response.json()
+        if "data" in response_data and isinstance(response_data["data"], list):
+            clients = response_data["data"]
+        else:
+            print(f"Unexpected API response structure: {response_data}")
+            exit(1)
 
-    # Extract clients from the data field
-    if "data" in response_data and isinstance(response_data["data"], list):
-        clients = response_data["data"]
-    else:
-        print(f"Unexpected API response structure: {response_data}")
+        # Find the client ID for the specified client name
+        client_id = None
+        for client in clients:
+            if client.get("name") == CLIENT_NAME:
+                client_id = client.get("id")
+                break
+
+        if not client_id:
+            print(f"Could not find a client named '{CLIENT_NAME}'")
+            exit(1)
+
+        print(f"Found client '{CLIENT_NAME}' with ID: {client_id}")
+
+        payload = {
+            "callbackURLs": CALLBACK_URLS,
+            "name": CLIENT_NAME,
+            "isPublic": False,
+            "pkceEnabled": False,
+        }
+
+        update_response = requests.put(
+            f"{BASE_URL}/api/oidc/clients/{client_id}",
+            headers=HEADERS,
+            json=payload,
+            timeout=60,
+        )
+
+        print(f"Update Status: {update_response.status_code}")
+        print(update_response.text)
+
+    except requests.exceptions.JSONDecodeError:
+        print("Failed to parse JSON response")
+        exit(1)
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
         exit(1)
 
-    # Find the client ID for "Pocket ID"
-    client_id = None
-    for client in clients:
-        if client.get("name") == "Pocket ID":
-            client_id = client.get("id")
-            break
 
-    if not client_id:
-        print("Could not find a client named 'Pocket ID'")
-        exit(1)
-
-    print(f"Found client 'Pocket ID' with ID: {client_id}")
-
-    # Step 2: Update the client with the new callback URLs
-    payload = {
-        "callbackURLs": callback_urls,
-        # Include other properties you want to maintain or update
-        "name": "Pocket ID",
-        "isPublic": False,  # Use the existing value from the API response
-        "pkceEnabled": False,  # Use the existing value from the API response
-    }
-
-    update_response = requests.put(
-        f"{base_url}/api/oidc/clients/{client_id}", headers=headers, json=payload
-    )
-
-    print(f"Update Status: {update_response.status_code}")
-    print(update_response.text)
-
-except requests.exceptions.JSONDecodeError:
-    print("Failed to parse JSON response")
-    exit(1)
-except requests.exceptions.RequestException as e:
-    print(f"Request error: {e}")
-    exit(1)
+if __name__ == "__main__":
+    main()
