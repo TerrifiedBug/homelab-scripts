@@ -3,9 +3,9 @@
 import requests
 
 DOMAIN = "domain.com"
-CLIENT_NAME = "Pocket ID"
-API_KEY = ""
-POCKETID_BASE_URL = "https://pocketid.domain.com"
+CLIENT_NAME = "your-oidc-client-name-here"
+API_KEY = "your-api-key-here"
+POCKETID_BASE_URL = "https://your-pocketid-url-here"
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
