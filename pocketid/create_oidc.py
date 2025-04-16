@@ -1,4 +1,4 @@
-"""Script to update callback URLs for OIDC client en masse"""
+"""Script to update callback URLs for OIDC client en masse. OIDC Needs to exist before hand"""
 
 import requests
 
