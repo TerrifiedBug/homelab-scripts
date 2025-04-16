@@ -5,7 +5,7 @@ import requests
 DOMAIN = "domain.com"
 CLIENT_NAME = "Pocket ID"
 API_KEY = ""
-BASE_URL = "https://pocketid.domain.com"
+POCKETID_BASE_URL = "https://pocketid.domain.com"
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
@@ -79,7 +79,9 @@ CALLBACK_URLS = [
 def main():
     """Main function to get and update client information."""
     # Step 1: Get a list of all clients to find the one named in CLIENT_NAME
-    response = requests.get(f"{BASE_URL}/api/oidc/clients", headers=HEADERS, timeout=60)
+    response = requests.get(
+        f"{POCKETID_BASE_URL}/api/oidc/clients", headers=HEADERS, timeout=60
+    )
     print(f"Status: {response.status_code}")
 
     try:
@@ -112,7 +114,7 @@ def main():
         }
 
         update_response = requests.put(
-            f"{BASE_URL}/api/oidc/clients/{client_id}",
+            f"{POCKETID_BASE_URL}/api/oidc/clients/{client_id}",
             headers=HEADERS,
             json=payload,
             timeout=60,
