@@ -12,63 +12,18 @@ HEADERS = {
     "X-API-KEY": API_KEY,
 }
 
-# List of services you want added to oidc
-SERVICES = [
-    "portainer",
-    "grafana",
-    "nginx",
-    "homer",
-    "prometheus",
-    "wazuh",
-    "opensearch",
-    "teslamate",
-    "pihole",
-    "teslamateservice",
-    "wordpress",
-    "router",
-    "investigate",
-    "epicgames",
-    "n8n",
-    "misp",
-    "minio",
-    "minioapi",
-    "api-opensearch",
-    "rancher",
-    "actualbudget",
-    "homepage",
-    "2fauth",
-    "parcel",
-    "homeassistant",
-    "httpd",
-    "grocy",
-    "kibana",
-    "authentik",
-    "zipline",
-    "codeserver",
-    "uptime",
-    "cyberchef",
-    "cv",
-    "pdf",
-    "it-tools",
-    "vw",
-    "convertx",
-    "neko",
-    "resume",
-    "changedetection",
-    "readme",
-    "hoarder",
-    "duplicati",
-    "glance",
-    "cwa",
-    "cup",
-    "qbittorrent",
-    "sonarr",
-    "radarr",
-    "prowlarr",
-    "jellyfin",
-    "jellyseer",
-    "sabnzbd",
-]
+
+def load_services():
+    """Load services from services.txt file."""
+    try:
+        with open("services.txt", "r", encoding="utf-8") as file:
+            return [line.strip() for line in file if line.strip()]
+    except FileNotFoundError:
+        print("Error: services.txt file not found")
+        exit(1)
+
+
+SERVICES = load_services()
 
 CALLBACK_URLS = [
     f"https://{service}.{DOMAIN}/caddy-security/oauth2/generic/authorization-code-callback"
@@ -78,7 +33,6 @@ CALLBACK_URLS = [
 
 def main():
     """Main function to get and update client information."""
-    # Step 1: Get a list of all clients to find the one named in CLIENT_NAME
     response = requests.get(
         f"{POCKETID_BASE_URL}/api/oidc/clients", headers=HEADERS, timeout=60
     )
@@ -93,7 +47,6 @@ def main():
             print(f"Unexpected API response structure: {response_data}")
             exit(1)
 
-        # Find the client ID for the specified client name
         client_id = None
         for client in clients:
             if client.get("name") == CLIENT_NAME:
